@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="paintView" type="id" />
+    <item name="colorPickerButton" type="id" />
+    <item name="brushSizeButton" type="id" />
+</resources>
