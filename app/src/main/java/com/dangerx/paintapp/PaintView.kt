@@ -2,84 +2,71 @@ package com.dangerx.paintapp
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.compose.ui.graphics.Color
-import androidx.core.graphics.toColorInt
+import android.view.ViewGroup
 import com.dangerx.paintapp.MainActivity.Companion.paintBrush
+import com.dangerx.paintapp.MainActivity.Companion.path
 
-class PaintView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
+class PaintView : View {
 
-    private val pathList = ArrayList<Path>()
-    private val colorList = ArrayList<Color>()
+    var params : ViewGroup.LayoutParams? = null
 
-    init {
-        initPaintBrush()
+    companion object{
+        var pathList = ArrayList<Path>()
+        var colorList = ArrayList<Int>()
+        var currentBrush = Color.BLACK;
     }
 
-    private fun initPaintBrush() {
+    constructor(context: Context) : this(context, null){
+        init()
+    }
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0){
+        init()
+    }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr){
+        init()
+    }
+
+    private fun init(){
         paintBrush.isAntiAlias = true
-        paintBrush.color = Color.Black.toColorInt() // Convert Color to Int
+        paintBrush.color = currentBrush
         paintBrush.style = Paint.Style.STROKE
         paintBrush.strokeJoin = Paint.Join.ROUND
-        paintBrush.strokeCap = Paint.Cap.ROUND
-        paintBrush.strokeWidth = 10f // Adjust stroke width as needed
-    }
+        paintBrush.strokeWidth = 8f
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        for (i in pathList.indices) {
-            paintBrush.color = colorList[i].toColorInt() // Convert Color to Int
-            canvas.drawPath(pathList[i], paintBrush)
-        }
+        params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
+        var x = event.x
+        var y = event.y
 
-        when (event.action) {
+        when(event.action){
             MotionEvent.ACTION_DOWN -> {
-                touchStart(x, y)
+                path.moveTo(x,y)
+                return true
             }
             MotionEvent.ACTION_MOVE -> {
-                touchMove(x, y)
+                path.lineTo(x,y)
+                pathList.add(path)
+                colorList.add(currentBrush)
             }
-            MotionEvent.ACTION_UP -> {
-                touchUp()
-            }
+            else -> return false
         }
-        invalidate()
-        return true
+        postInvalidate()
+        return false;
     }
 
-    private fun touchStart(x: Float, y: Float) {
-        val path = Path()
-        path.moveTo(x, y)
-        pathList.add(path)
-        colorList.add(Color(paintBrush.color)) // Convert Int to Color
+    override fun onDraw(canvas: Canvas) {
+        for(i in pathList.indices){
+            paintBrush.color = colorList[i]
+            canvas.drawPath(pathList[i], paintBrush)
+            invalidate()
+        }
     }
-
-    private fun touchMove(x: Float, y: Float) {
-        pathList.last().lineTo(x, y)
-    }
-
-    private fun touchUp() {
-        // Add any necessary cleanup after touch up
-    }
-
-    fun setColor(newColor: Color) {
-        paintBrush.color = newColor.toColorInt() // Convert Color to Int
-    }
-}
-
-private fun Color.toColorInt(): Color {
-
 }
