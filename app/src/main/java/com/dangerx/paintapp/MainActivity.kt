@@ -1,46 +1,56 @@
 package com.dangerx.paintapp
-
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.dangerx.paintapp.ui.theme.PaintAppTheme
+import com.dangerx.paintapp.PaintView.Companion.colorList
+import com.dangerx.paintapp.PaintView.Companion.currentBrush
+import com.dangerx.paintapp.PaintView.Companion.pathList
 
 class MainActivity : ComponentActivity() {
+
+    companion object{
+        var path = Path()
+        var paintBrush = Paint()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            PaintAppTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+        setContentView(R.layout.activity_main)
+
+
+        val redBtn = findViewById<ImageButton>(R.id.redColor)
+        val blueBtn = findViewById<ImageButton>(R.id.blueColor)
+        val blackBtn = findViewById<ImageButton>(R.id.blackColor)
+        val eraser = findViewById<ImageButton>(R.id.whiteColor)
+
+        redBtn.setOnClickListener{
+            paintBrush.setColor(Color.RED)
+            currentColor(paintBrush.color)
+        }
+
+        blueBtn.setOnClickListener{
+            paintBrush.setColor(Color.BLUE)
+            currentColor(paintBrush.color)
+        }
+
+        blackBtn.setOnClickListener{
+            paintBrush.setColor(Color.BLACK)
+            currentColor(paintBrush.color)
+        }
+
+        eraser.setOnClickListener{
+            paintBrush.setColor(Color.WHITE)
+            pathList.clear()
+            colorList.clear()
+            path.reset()
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PaintAppTheme {
-        Greeting("Android")
+    private fun currentColor(color: Int){
+        currentBrush = color
+        path = Path()
     }
 }
