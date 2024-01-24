@@ -1,109 +1,59 @@
 package com.dangerx.paintapp
 
-import android.content.Context
-import android.graphics.*
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.os.Bundle
-import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
 import android.widget.ImageButton
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import com.dangerx.paintapp.PaintView.Companion.colorList
+import com.dangerx.paintapp.PaintView.Companion.currentBrush
+import com.dangerx.paintapp.PaintView.Companion.pathList
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
+
+    companion object {
+        var path = Path()
+        var paintBrush = Paint()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val paintView = findViewById<PaintView>(R.id.paintView)
-        val colorPickerButton = findViewById<ImageButton>(R.id.colorPickerButton)
-        val brushSizeButton = findViewById<ImageButton>(R.id.brushSizeButton)
-        val undoButton = findViewById<ImageButton>(R.id.undoButton)
 
-        colorPickerButton.setOnClickListener {
-            // Launch color picker dialog
-            ColorPickerDialog(this) { color: Int ->
-                paintView.setColor(color)
-            }.show()
+        val redBtn = findViewById<ImageButton>(R.id.redColor)
+        val blueBtn = findViewById<ImageButton>(R.id.blueColor)
+        val blackBtn = findViewById<ImageButton>(R.id.blackColor)
+        val eraser = findViewById<ImageButton>(R.id.whiteColor)
+
+        redBtn.setOnClickListener {
+            paintBrush.setColor(Color.RED)
+            currentColor(paintBrush.color)
         }
 
-        brushSizeButton.setOnClickListener {
-            // Launch brush size dialog
-            BrushSizeDialog(this) { size: Float ->
-                paintView.setBrushSize(size)
-            }.show()
+        blueBtn.setOnClickListener {
+            paintBrush.setColor(Color.BLUE)
+            currentColor(paintBrush.color)
         }
 
-        undoButton.setOnClickListener {
-            paintView.undo()
+        blackBtn.setOnClickListener {
+            paintBrush.setColor(Color.BLACK)
+            currentColor(paintBrush.color)
+        }
+
+        eraser.setOnClickListener {
+            paintBrush.setColor(Color.WHITE)
+            pathList.clear()
+            colorList.clear()
+            path.reset()
         }
     }
 
-    inner class PaintView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
-        private val paint = Paint()
-        private var path = Path()
-        private var currentColor = Color.BLACK
-        private var currentBrushSize = 10f
-        private val drawHistory = mutableListOf<Path>()
-
-        init {
-            setupPaint()
-        }
-
-        private fun setupPaint() {
-            paint.color = currentColor
-            paint.isAntiAlias = true
-            paint.strokeWidth = currentBrushSize
-            paint.style = Paint.Style.STROKE
-            paint.strokeJoin = Paint.Join.ROUND
-            paint.strokeCap = Paint.Cap.ROUND
-        }
-
-        fun setColor(color: Int) {
-            currentColor = color
-            setupPaint()
-        }
-
-        fun setBrushSize(brushSize: Float) {
-            currentBrushSize = brushSize
-            setupPaint()
-        }
-
-        fun undo() {
-            if (drawHistory.isNotEmpty()) {
-                drawHistory.removeAt(drawHistory.size - 1)
-                invalidate()
-            }
-        }
-
-        override fun onDraw(canvas: Canvas) {
-            for (drawnPath in drawHistory) {
-                canvas.drawPath(drawnPath, paint)
-            }
-            canvas.drawPath(path, paint)
-        }
-
-        override fun onTouchEvent(event: MotionEvent): Boolean {
-            val x = event.x
-            val y = event.y
-
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    path = Path()
-                    path.moveTo(x, y)
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    path.lineTo(x, y)
-                }
-                MotionEvent.ACTION_UP -> {
-                    drawHistory.add(Path(path))
-                    path.reset()
-                }
-                else -> return false
-            }
-
-            invalidate()
-            return true
-        }
+    private fun currentColor(color: Int) {
+        currentBrush = color
+        path = Path()
     }
 }
+
+
