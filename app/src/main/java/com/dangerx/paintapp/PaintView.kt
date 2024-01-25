@@ -70,3 +70,6 @@ class PaintView : View {
         }
     }
 }
+
+
+//updated the paintview code
